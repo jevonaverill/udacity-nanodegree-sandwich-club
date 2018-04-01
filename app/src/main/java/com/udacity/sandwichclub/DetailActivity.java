@@ -3,6 +3,7 @@ package com.udacity.sandwichclub;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,25 +12,37 @@ import com.squareup.picasso.Picasso;
 import com.udacity.sandwichclub.model.Sandwich;
 import com.udacity.sandwichclub.utils.JsonUtils;
 
-import java.util.List;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_POSITION = "extra_position";
     private static final int DEFAULT_POSITION = -1;
 
-    private TextView tvAlsoKnownAs, tvPlaceOfOrigin, tvDescription, tvIngredients;
+    @BindView(R.id.also_known_tv)
+    TextView tvAlsoKnownAs;
+
+    @BindView(R.id.origin_tv)
+    TextView tvPlaceOfOrigin;
+
+    @BindView(R.id.description_tv)
+    TextView tvDescription;
+
+    @BindView(R.id.ingredients_tv)
+    TextView tvIngredients;
+
+    @BindView(R.id.image_iv)
+    ImageView ivIngredients;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        ImageView ingredientsIv = findViewById(R.id.image_iv);
-        tvAlsoKnownAs = findViewById(R.id.also_known_tv);
-        tvPlaceOfOrigin = findViewById(R.id.origin_tv);
-        tvDescription = findViewById(R.id.description_tv);
-        tvIngredients = findViewById(R.id.ingredients_tv);
+        ButterKnife.bind(this);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Intent intent = getIntent();
         if (intent == null) {
@@ -54,9 +67,18 @@ public class DetailActivity extends AppCompatActivity {
 
         populateUI(sandwich);
 
-        Picasso.with(this)
-                .load(sandwich.getImage())
-                .into(ingredientsIv);
+        if (TextUtils.isEmpty(sandwich.getImage())) {
+            Picasso.with(this)
+                    .cancelRequest(ivIngredients);
+
+            ivIngredients.setImageResource(R.drawable.image_not_available);
+        } else {
+            Picasso.with(this)
+                    .load(sandwich.getImage())
+                    .error(R.drawable.image_error)
+                    .placeholder(R.drawable.image_placeholder)
+                    .into(ivIngredients);
+        }
 
         setTitle(sandwich.getMainName());
     }
@@ -70,16 +92,16 @@ public class DetailActivity extends AppCompatActivity {
         if (sandwich.getAlsoKnownAs().isEmpty()) {
             tvAlsoKnownAs.setText(R.string.no_data_error_message);
         } else {
-            tvAlsoKnownAs.setText(convertListToString(sandwich.getAlsoKnownAs()));
+            tvAlsoKnownAs.setText(TextUtils.join("\n", sandwich.getAlsoKnownAs()));
         }
 
-        if (sandwich.getPlaceOfOrigin().isEmpty()) {
+        if (TextUtils.isEmpty(sandwich.getPlaceOfOrigin())) {
             tvPlaceOfOrigin.setText(R.string.no_data_error_message);
         } else {
             tvPlaceOfOrigin.setText(sandwich.getPlaceOfOrigin());
         }
 
-        if (sandwich.getDescription().isEmpty()) {
+        if (TextUtils.isEmpty(sandwich.getDescription())) {
             tvDescription.setText(R.string.no_data_error_message);
         } else {
             tvDescription.setText(sandwich.getDescription());
@@ -88,15 +110,8 @@ public class DetailActivity extends AppCompatActivity {
         if (sandwich.getIngredients().isEmpty()) {
             tvIngredients.setText(R.string.no_data_error_message);
         } else {
-            tvIngredients.setText(convertListToString(sandwich.getIngredients()));
+            tvIngredients.setText(TextUtils.join("\n", sandwich.getIngredients()));
         }
     }
 
-    private String convertListToString(List<String> stringList) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < stringList.size(); i++) {
-            stringBuilder.append(stringList.get(i)).append("\n");
-        }
-        return stringBuilder.toString();
-    }
 }

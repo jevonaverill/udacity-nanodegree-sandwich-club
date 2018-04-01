@@ -36,11 +36,11 @@ public class JsonUtils {
         try {
             jsonObject = new JSONObject(json);
             jsonObjectName = jsonObject.getJSONObject(JsonUtils.NAME);
-            mainName = jsonObjectName.getString(JsonUtils.MAIN_NAME);
+            mainName = jsonObjectName.optString(JsonUtils.MAIN_NAME);
             alsoKnownAs = getJSONArrayList(jsonObjectName.getJSONArray(JsonUtils.ALSO_KNOWN_AS));
-            placeOfOrigin = jsonObject.getString(JsonUtils.PLACE_OF_ORIGIN);
-            description = jsonObject.getString(JsonUtils.DESCRIPTION);
-            image = jsonObject.getString(JsonUtils.IMAGE);
+            placeOfOrigin = jsonObject.optString(JsonUtils.PLACE_OF_ORIGIN);
+            description = jsonObject.optString(JsonUtils.DESCRIPTION);
+            image = jsonObject.optString(JsonUtils.IMAGE);
             ingredients = getJSONArrayList(jsonObject.getJSONArray(JsonUtils.INGREDIENTS));
         } catch (JSONException e) {
             Log.e(LOG_TAG, "Error with parse sandwich JSON: {}", e);
